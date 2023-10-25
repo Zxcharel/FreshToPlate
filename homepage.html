@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home Screen</title>
+
+    <!--Put your API key in the request URL of every request you make in the format &apiKey=YOUR-API-KEY.
+    Now you can use endpoints following our documentation.
+    Download an SDK to embed the API into your project or access the API via our Postman collection. 
+    https://api.spoonacular.com/recipes/findByIngredients?ingredients=apples,+flour,+sugar&number=2 -->
+
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif; 
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .menu {
+            text-align: center;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px;
+        }
+
+        #recipeSearch {
+            display: none;
+        }
+
+        #inventory {
+            display: none;
+        }
+
+        #mealPlanning {
+            display: none;
+        }
+
+        #recipeSearch, #inventory, #mealPlanning {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Home Screen</h1>
+        <div class="menu">
+            <button onclick="showRecipeSearch()">Recipe Search</button>
+            <button onclick="showInventory()">Ingredients Inventory</button>
+            <button onclick="showMealPlanning()">Meal Planning</button>
+        </div>
+
+        <div id="recipeSearch">
+            <h2>Recipe Search</h2>
+            <!-- Add your recipe search form here -->
+            <a href=ingredient_search.html> Search </a>
+        </div>
+
+        <div id="inventory">
+            <h2>Inventory</h2>
+            <!-- Add your ingredients inventory list and management form here -->
+            <a href=inventory.html> Search </a>
+        </div>
+
+        <div id="mealPlanning">
+            <h2>Meal Planning</h2>
+            <!-- Add your meal planning functionality here -->
+            <a href= meal_plan.html> Search </a>
+        </div>
+    </div>
+
+    <script>
+        function showRecipeSearch() {
+            document.getElementById("recipeSearch").style.display = "block";
+            document.getElementById("inventory").style.display = "none";
+            document.getElementById("mealPlanning").style.display = "none";
+        }
+
+        function showInventory() {
+            document.getElementById("recipeSearch").style.display = "none";
+            document.getElementById("inventory").style.display = "block";
+            document.getElementById("mealPlanning").style.display = "none";
+        }
+
+        function showMealPlanning() {
+            document.getElementById("recipeSearch").style.display = "none";
+            document.getElementById("inventory").style.display = "none";
+            document.getElementById("mealPlanning").style.display = "block";
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+
+<html lang = "en">
+    <head>
+        <link rel = "stylesheet" href = "./login.css">
+        <!-- jquery cdn -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script src = "./login.js"></script>
+    </head>
+    <body class = "flexCenter">
+        <div id = "login" class = "mainContainer">
+            <div class = "inputHeader flexCenter">
+                <p>Login</p>
+            </div>
+            <div id = "loginInput" class = "inputBox">    
+                <input placeholder="Email">
+                <input placeholder="Password">
+                <p class = "link"> Forgot Password?</p>
+            </div>
+            <div id = "loginSubmit" class = "submitBox">
+                <div class = "submitButton flexCenter accountButton" onclick = "checkLogin()">
+                    <p>Login</p>
+                </div>
+                <p>Don't have an account? <span class = "link" onclick = "toggleLogin()">Signup</span></p>
+            </div>
+            <div class = "otherOpt">
+                <div class = "lineBox">
+                    <div class ="lineFill"><div class = "line"></div></div>
+                    <p>Or</p>
+                    <div class ="lineFill"><div class = "line"></div></div>
+                </div>
+                <div class = "otherButton submitButton facebook">
+                    <img src = "img1/facebook.png">
+                    <p>Login with Facebook</p>
+                </div>
+                <div class = "otherButton submitButton google">
+                    <img src = "img1/google.png">
+                    <p>Login with Google</p>
+                </div>
+            </div>
+        </div>
+        <div id = "signup" class = "mainContainer">
+            <div class = "inputHeader flexCenter">
+                <p>Signup</p>
+            </div>
+            <div id = "signupInput" class = "inputBox">
+                <input placeholder="Email">
+                <input placeholder="Create password">
+                <input placeholder="Confirm password">
+            </div>
+            <div id = "signupSubmit" class = "submitBox">
+                <div class = "submitButton flexCenter accountButton" onclick = "checkSignup()">
+                    <p>Signup</p>
+                </div>
+                <p>Already have an account? <span class = "link" onclick = "toggleLogin()">Login</span></p>
+            </div>
+            <div class = "otherOpt">
+                <div class = "lineBox">
+                    <div class ="lineFill"><div class = "line"></div></div>
+                    <p>Or</p>
+                    <div class ="lineFill"><div class = "line"></div></div>
+                </div>
+                <div class = "otherButton submitButton facebook" onclick = "redirectFacebook()">
+                    <img src = "img1/facebook.png">
+                    <p>Login with Facebook</p>
+                </div>
+                <div class = "otherButton submitButton google" onclick = "redirectGoogle()">
+                    <img src = "img1/google.png">
+                    <p>Login with Google</p>
+                </div>
+            </div>
+        </div>
+    </body>
+
+</html>

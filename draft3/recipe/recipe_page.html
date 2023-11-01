@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="../style.css" />
+
+    <!-- Add Axios Library -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+</head>
+
+<body>
+
+    <!-- REMEMBER TO UPDATE -->
+    <!-- nav bar -->
+    <div class="topnav sticky-top">
+        <a href="#">Home</a>
+        <a class="active" href="recipe_main.html">Recipes</a>
+        <a href="#">Inventory</a>
+        <a href="../mealplan/mealplan_main.html">Meal Plan</a>
+        <div class="topnav-right">
+          <a href="#">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                </svg>
+          </a>
+        </div>
+    </div>
+
+    <!-- page header -->
+    <div class="row">
+        <div class="card" id="card" style="height: 50vh; overflow: hidden;">
+            <div class="card-img-overlay p-4 centerHeader w-100 my-auto" id="cardImgText"></div>
+        </div>
+    </div>
+
+    <!-- page content (dynamically generated) -->
+    <div class="container">
+
+        <div class="row p-3 m-auto justify-content-center align-content-center">
+            <!-- <div class="row" id="summary"></div>
+            <div class="row p-3" id="recipe"></div> -->
+    
+            <div class="col m-auto justify-content-center align-content-center d-flex">
+                <div class="">
+                    <button class="p-1 m-1" onclick="openTab('Ingredients')">Ingredients</button>
+                    <button class="p-1 m-1" onclick="openTab('Steps')">Steps</button>
+                </div>
+            </div>
+            
+    
+            <div id="Ingredients" class="tabClass">
+                <h2>Ingredients</h2>
+                <p id="ingredients"></p>
+            </div>
+            
+            <div id="Steps" class="tabClass" style="display:none">
+                <h2>Steps</h2>
+                <p id="recipe"></p>
+            </div>
+    
+        </div>
+
+    </div>
+    
+    
+
+
+
+
+    
+
+    
+
+    
+    <script>
+
+        //testing
+        function openTab(tabName) {
+            var i;
+            var x = document.getElementsByClassName("tabClass");
+            for (i = 0; i < x.length; i++) {
+                x[i].style.display = "none";
+            }
+            document.getElementById(tabName).style.display = "block";
+        }
+
+
+
+
+        console.log(document.cookie)
+        var cookie = document.cookie
+        search = cookie.split("; ")
+        console.log(search)
+        for (eachCookie of search) {
+            if (eachCookie.substring(0,6) == "idStr=") {
+                var recipeId = eachCookie.substring(6,)
+                console.log(recipeId)
+            }
+        }
+
+        const apiKey = '014f17961be149788f7dbc80c946612c'; // Replace with your Spoonacular API key
+
+        console.log(recipeId)
+        getRecipeById(recipeId, apiKey);
+
+        function getRecipeById(recipeId, apiKey) {
+            const apiUrl = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${apiKey}`;
+
+            fetch(apiUrl)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Failed to fetch recipe information');
+                    }
+                })
+                .then(data => {
+                    // Handle the recipe data here
+                    console.log(data);
+                    console.log(data.instructions)
+                    console.log(data.summary)
+                    // document.getElementById("summary").innerHTML = data.summary
+                    document.getElementById("ingredients").innerHTML = "<p id='ingredients'>"
+
+                    for (index in data.extendedIngredients) {
+                        document.getElementById("ingredients").innerHTML += `
+                        <div class="col-12" id="${data.extendedIngredients[index].id}col">
+                            <input type="checkbox" class="" name="ingredients" id="${data.extendedIngredients[index].id}" onclick="haveIngredient(${data.extendedIngredients[index].id})"> 
+                                <label for="${data.extendedIngredients[index].id}"> ${data.extendedIngredients[index].original} </label>
+                        </div>
+                        `
+                        console.log(data.extendedIngredients[index].original)
+                    }
+
+                    document.getElementById("ingredients").innerHTML += "</p>"
+
+                    document.getElementById("recipe").innerHTML = data.instructions
+
+                    var card = document.getElementById("card")
+                    var img = document.createElement("img")
+                    console.log(data.image)
+                    img.src = data.image
+                    img.className = "card-img-top bg-opacity-50 img-fluid w-100"
+                    var imgText = document.getElementById("cardImgText")
+                    card.insertBefore(img, imgText)
+
+                    imgText.innerHTML += `<h1 class="large-text"> ${data.title} </h1> <br>  
+                                        <p class="med-text"> Cook time: ${data.readyInMinutes} minutes </p>  `
+
+                })
+                .catch(error => {
+                    // Handle errors here
+                    console.error(error);
+                });
+        }
+
+        function haveIngredient(id) {
+            if (document.getElementById(id + "col").className == "strikeOff") {
+                document.getElementById(id + "col").className = ""
+            }
+            else {
+                document.getElementById(id + "col").className = "strikeOff"
+            }
+            
+            console.log(document.getElementById(id + "col").className)
+        }
+
+    </script>
+
+
+</body>
+</html>

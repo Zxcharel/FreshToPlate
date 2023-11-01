@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="../style.css" />
+
+    <!-- Add Axios Library -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+</head>
+<body>
+
+    <!-- REMEMBER TO UPDATE -->
+    <div class="topnav sticky-top">
+        <a href="#">Home</a>
+        <a href="../recipe/recipe_main.html">Recipes</a>
+        <a href="#">Inventory</a>
+        <a class="active" href="#">Meal Plan</a>
+        <div class="topnav-right">
+            <a href="#">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <h1>Meal Planning</h1>
+    <button id="generate-button" onclick="generateMealPlan()">Generate Meal Plan</button>
+
+    <!-- remember to change:
+        includeIngredients: from stash (if clicked?), then filter by min-missing-ingredients
+        excludeIngredients & intolerences: from allergens
+        excludeCuisine: from preferences
+        diet: can be from preference? like auto selected if entered?
+    -->
+
+    <div id="meal-plan">
+        <h2>Generated Meal Plan:</h2>
+        <ul id="meal-plan-list"></ul>
+    </div>
+
+    <script>
+        const apiKey = '014f17961be149788f7dbc80c946612c';
+        const apiUrl = 'https://api.spoonacular.com/mealplanner/generate';
+
+        async function generateMealPlan() {
+            const mealPlanList = document.getElementById('meal-plan-list');
+            mealPlanList.innerHTML = '';
+
+            try {
+                const response = await fetch(`${apiUrl}?apiKey=${apiKey}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data);
+                    console.log(data.week)
+                    displayMealPlan(data.week, mealPlanList);
+
+                } else {
+                    console.error('Error:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function displayMealPlan(mealPlan, mealPlanList) {
+            var days = Object.keys(mealPlan)
+            if (days.length === 0) {
+                mealPlanList.innerHTML = '<p>No meal plan generated.</p>';
+            } else {
+                days.forEach(day => {
+                    console.log(mealPlan)
+                    console.log(mealPlan[day])
+                    console.log(mealPlan[day].meals)
+                   
+                    var dayHeader = document.createElement("h2")
+                    dayHeader.appendChild(document.createTextNode(day))
+                    mealPlanList.appendChild(dayHeader)
+
+                    mealNames = ["Breakfast", "Lunch", "Dinner"]
+
+                    var mealIndex = Object.keys(mealPlan[day].meals)
+                    for (meal of mealIndex) {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${mealNames[meal]}: ${mealPlan[day].meals[meal].title} - ${mealPlan[day].meals[meal].id}`;
+                        console.log(listItem)
+                        mealPlanList.appendChild(listItem);
+                    }
+                    
+                    
+                });
+            }
+        }
+    </script>
+
+</body>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="../style.css" />
+
+    <!-- Add Axios Library -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+</head>
+
+<body>
+
+    <!-- REMEMBER TO UPDATE -->
+    <!-- nav bar -->
+    <div class="topnav sticky-top">
+        <a href="#">Home</a>
+        <a class="active" href="recipe_main.html">Recipes</a>
+        <a href="#">Inventory</a>
+        <a href="../mealplan/mealplan_main.html">Meal Plan</a>
+        <div class="topnav-right">
+          <a href="#">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                </svg>
+          </a>
+        </div>
+    </div>
+
+    <!-- search area -->
+    <div class="container">
+        <div class="row">
+            <div class="col p-3">
+                <input autocomplete="off" type="text" placeholder="Search for a recipe" id="ingredients-input" name="ingredients-input">
+                <button class="my-1" onclick="searchRecipes()">Search</button>
+                <button class="my-1" onclick="filterDisplay()">Filter</button>
+
+                <div class="row px-3">
+                    <div class="col-4 p-0">
+                        <div class="autocomplete" id="autocomplete" style="max-height: 8rem; overflow: scroll;"></div>
+                    </div>
+                </div>
+
+                <div id="resultText"> </div>
+
+                <!-- filter box -->
+                <div class="container my-2" id="filterBox" style="display: none; ">
+                    <div class="row filter-header">
+                        Filters
+                    </div>                        
+                    <form>
+
+                        <!-- remember to change:
+                            includeIngredients: from stash (if clicked?), then filter by min-missing-ingredients
+                            excludeIngredients & intolerences: from allergens
+                            excludeCuisine: from preferences
+                            diet: can be from preference? like auto selected if entered?
+                        -->
+
+                        <div class="row filter-box">
+                            <div class="col-6 d-inline-block">
+                                <p class="fw-bold m-0 my-1"> Diet </p>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <input type="checkbox" id="glutenFree" onclick="dietInput(this.id)">
+                                            <label for="glutenFree">
+                                                Gluten Free
+                                            </label> <br>
+                                        <input type="checkbox" id="ketogenic" onclick="dietInput(this.id)">
+                                            <label for="ketogenic">
+                                                Ketogenic
+                                            </label> <br>
+                                        <input type="checkbox" id="pescatarian" onclick="dietInput(this.id)">
+                                            <label for="pescatarian">
+                                                Pescatarian
+                                            </label> <br>
+                                    </div>                                
+                                    <div class="col-6">
+                                        <input type="checkbox" id="vegetarian" onclick="dietInput(this.id)">
+                                            <label for="vegetarian">
+                                                Vegetarian
+                                            </label> <br>
+                                        <input type="checkbox" id="vegan" onclick="dietInput(this.id)">
+                                            <label for="vegan">
+                                                Vegan
+                                            </label> <br>
+                                    </div>   
+                                </div>                                 
+                            </div>
+                            <div class="col-6">
+                                <p class="fw-bold m-0 my-1"> Sort-by </p>     
+                                <div class="row">
+                                    <div class="col-6">
+                                        <input type="radio" name="sort" id="popularity" onclick="sortInput(this.id)" value="popularity">
+                                            <label for="popularity">
+                                                Popularity
+                                            </label> <br>
+                                        <input type="radio" name="sort" id="healthiness" onclick="sortInput(this.id)" value="healthiness">
+                                            <label for="healthiness">
+                                                Healthiness
+                                            </label> <br>
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="radio" name="sort" id="price" onclick="sortInput(this.id)" value="price">
+                                            <label for="price">
+                                                Price
+                                            </label> <br>
+                                        <input type="radio" name="sort" id="time" onclick="sortInput(this.id)" value="time">
+                                            <label for="time">
+                                                Time
+                                            </label> <br>
+                                    </div>
+                                </div>                           
+                                
+                                
+                            </div>
+                            <div class="col-12 my-2 fw-bold" style="text-align: center;">
+                                <br>
+                                <input type="checkbox" id="" onclick="">
+                                    <label for="">
+                                        I want to clear my fridge!
+                                    </label>
+                            </div>
+                        </div>                            
+                    </form>
+                </div>
+            </div>
+              
+        </div>
+    </div>
+
+    <!-- webpage (dynamically generated) -->
+    <div class="album py-5 bg-light">
+        <div class="container">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 justify-content-start"  id="results">
+            </div>
+        </div>        
+    </div>
+    
+    <script>
+
+        var input = document.getElementById("ingredients-input")
+        input.addEventListener("keyup", getSuggestion)
+
+        function getSuggestion() {
+            
+            let value = input.value
+            var url = `https://api.spoonacular.com/recipes/autocomplete?apiKey=${apiKey}&number=10&query=${value}`
+            
+            console.log(value)
+
+            axios.get(url)
+
+            .then (
+
+                response => { //function shorthand
+                    console.log(response.data)
+
+                    let output = document.getElementById("autocomplete")
+
+                    if (response.data.length !== 0) {
+
+                        output.innerText = ""
+                        var autocompleteSugg = document.createElement("table")
+                        autocompleteSugg.className = "autocompleteTable"
+
+                        for (index in response.data) {
+                            var autocompleteLine = document.createElement("tr")
+                            autocompleteLine.setAttribute("onclick", "autosearch(this)")    
+                            var autocompleteData = document.createElement("td")
+                            var autocompleteText = document.createTextNode(response.data[index].title)
+
+                            autocompleteData.appendChild(autocompleteText)
+                            autocompleteLine.appendChild(autocompleteData)
+                            autocompleteSugg.appendChild(autocompleteLine)
+                        }
+
+                        output.appendChild(autocompleteSugg)
+
+                    }
+
+                    else {
+                        output.innerText = ""
+                    }
+                    
+                    
+                }
+            )
+
+            .catch (
+                error => {
+                    let output = document.getElementById("autocomplete")
+                    console.log(error.message)
+                }
+            )
+        }
+
+        function autosearch(sugg) {
+            console.log(sugg.innerText)
+            console.log(input)
+            input.value = sugg.innerText
+            console.log(input)
+            searchRecipes()
+        }
+
+        function filterDisplay() {
+            var x = document.getElementById("filterBox")
+            if (x.style.display == "block") {
+                x.style.display = "none"
+            }
+            else {
+                x.style.display = "block"
+            }
+        }
+
+        var cookie = document.cookie
+        search = cookie.split("; ")
+        console.log(search)
+        for (eachCookie of search) {
+            if (eachCookie.substring(0,10) == "searchStr=") {
+                var searchStr = eachCookie.substring(10,)
+                console.log(searchStr)
+            }
+            else if (eachCookie.substring(0,10) == "recipeStr=") {
+                var recipeStr = eachCookie.substring(10,)
+                console.log(recipeStr)
+            }
+        }
+
+        var recipesStrArr = recipeStr.split("~~") 
+        console.log(recipesStrArr)
+        var recipesObj = {}
+
+        document.getElementById("resultText").innerHTML = `<p class='small-text'> ${recipesStrArr.length} results found for "${searchStr}" </p>`
+
+        for (recipeStr of recipesStrArr) {
+            
+            recipeStr = recipeStr.substring(1,recipeStr.length-1)
+            console.log(recipeStr)
+            recipeStrInfo = recipeStr.split("##")
+            console.log(recipeStrInfo)
+            recipesObj[recipeStrInfo[1]] = {"name": recipeStrInfo[0], "image": recipeStrInfo[2]}
+
+        }
+
+        console.log(recipesObj)
+
+        var results = document.getElementById("results")
+        
+
+        recipeIds = Object.keys(recipesObj)
+
+        for (recipe of recipeIds) {
+            createCard(recipe, recipesObj)
+        }
+
+        function createCard(recipeId, recipesObj) {
+            
+            const col = document.createElement("div");
+            col.className = "col my-1";
+            // col.addEventListener("keyupx", selectedRecipe(recipesObj[recipeName].id))
+            // col.onclick = selectedRecipe(recipesObj[recipeName].id)
+
+            const buttonBack = document.createElement("a")
+            buttonBack.href = "recipe_page.html"
+            buttonBack.style.textDecoration = "none"
+            buttonBack.onclick = selectedRecipe => {
+                console.log(recipeId)
+                document.cookie = "idStr=" + recipeId
+            }
+
+            const card = document.createElement("div");
+            card.className = "card shadow-sm m-1 h-100";
+
+            const img = document.createElement("img");
+            img.src = recipesObj[recipeId].image;
+            img.class = "p-0 m-auto"
+
+            const cardBody = document.createElement("div");
+            cardBody.className = "card-body";
+
+            const description = document.createElement("p");
+            description.className = "card-text"
+            description.textContent = recipesObj[recipeId].name;
+
+            cardBody.appendChild(description)
+            cardBody.appendChild(subHeader)
+            card.appendChild(img)
+            card.appendChild(cardBody)
+            buttonBack.appendChild(card)
+            col.appendChild(buttonBack)
+
+            results.appendChild(col);
+
+            // card.addEventListener("click", recipePage(recipeName, recipesObj))
+
+            // <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+
+            //     <div class="col">
+            //         <div class="card shadow-sm">
+                        
+            //             <img width="100%" height="225" src="album/Minions_characters.png">
+            //             <div class="card-body">
+            //                 <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+            //                 <div class="d-flex justify-content-between align-items-center">
+            //                     <div class="btn-group">
+            //                     <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+            //                     <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
+            //                     </div>
+            //                     <small class="text-muted">9 mins</small>
+            //                 </div>
+            //             </div>
+            //         </div>
+            //     </div>
+
+            // make it such that the whole thing is a button?
+
+        }
+
+        const apiKey = '014f17961be149788f7dbc80c946612c';
+        const apiUrl = 'https://api.spoonacular.com/recipes/complexSearch';
+
+        var dietsArr = []
+        var filter = ''
+
+        function dietInput(diet) {
+            dietsArr.push(diet)
+        }
+
+        function sortInput(filterInput) {
+            filter = filterInput
+        }        
+
+        async function searchRecipes() {
+            const ingredientsInput = document.getElementById('ingredients-input').value;
+            var ingredientsQuery = (ingredientsInput.toLowerCase()).split(" ").join("+")
+            console.log(ingredientsQuery)
+            console.log(dietsArr)
+
+            if (dietsArr.length !== 0) {
+                var dietQuery = (dietsArr.join("+")).toLowerCase()
+            }
+            else {
+                var dietQuery = ""
+            }
+
+            console.log(dietQuery)
+            console.log(filter)
+            console.log(`${apiUrl}?apiKey=${apiKey}&query=${ingredientsQuery}&diet=${dietQuery}&sort=${filter}&number=24`)
+
+            try {
+
+                var response = await fetch(`${apiUrl}?apiKey=${apiKey}&query=${ingredientsQuery}&diet=${dietQuery}&sort=${filter}&number=24`)
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data.results); // Add this line to log the data structure
+                    displayRecipes(data.results);
+                    
+                } else {
+                    document.getElementById("resultText").innerText = "No recipes found."
+                    console.error('Error:', response.statusText);
+                }
+            } catch (error) {
+                document.getElementById("resultText").innerText = "No recipes found."
+                console.error('Error:', error);
+            }
+
+        }
+
+        function displayRecipes(recipes) {
+            if (recipes.length === 0) {
+                document.getElementById("resultText").innerHTML = "<p class='small-text'> No recipes found. </p>"
+
+            } else {
+                const ingredientsInput = document.getElementById('ingredients-input').value;
+                var recipeStr = ''
+                recipes.forEach(recipe => {
+
+                    recipeStr += `[${recipe.title}##${recipe.id}##${recipe.image}]~~` 
+
+                });
+                
+                recipeStr = recipeStr.substring(0, recipeStr.length-2)
+                console.log(recipeStr)
+                
+                document.cookie = "searchStr=" + ingredientsInput
+                document.cookie = "recipeStr=" + recipeStr
+                console.log(document.cookie)
+
+                window.location.href = "recipe_searched.html"
+            }
+        }
+            
+    </script>
+    
+</body>
+
+

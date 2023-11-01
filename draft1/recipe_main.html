@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="style.css" />
+
+</head>
+<body>
+
+    <!-- REMEMBER TO UPDATE -->
+    <div class="topnav">
+        <a href="#">Home</a>
+        <a class="active" href="#">Recipes</a>
+        <a href="#">Inventory</a>
+        <div class="topnav-right">
+          <a href="#">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                </svg>
+          </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="card">
+            <img src="img/recipe_search_bg.jpeg" class="card-img-top">
+            <!-- find nicer clearer photo 
+            https://unsplash.com/s/photos/ingredients?license=free&orientation=landscape -->
+            <div class="card-img-overlay">
+                <div class="row search-wrapper">
+                    <div class="col-1"></div>
+                    <div class="col-10" id="input">
+                        <input type="text" placeholder="Search for a recipe" id="ingredients-input" name="ingredients-input">
+                        <button onclick="searchRecipesByIngredients()">Search</button>
+                        <div id="resultText"> </div>
+                    </div>
+                    <div class="col-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = '014f17961be149788f7dbc80c946612c';
+        const apiUrl = 'https://api.spoonacular.com/recipes/findByIngredients';
+
+        async function searchRecipesByIngredients() {
+            const ingredientsInput = document.getElementById('ingredients-input').value;
+            console.log(`${apiUrl}?apiKey=${apiKey}&ingredients=${ingredientsInput}`)            
+
+            try {
+                var response = await fetch(`${apiUrl}?apiKey=${apiKey}&ingredients=${ingredientsInput}`);
+                
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data); // Add this line to log the data structure
+                    displayRecipes(data);
+                    
+                } else {
+                    console.error('Error:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function displayRecipes(recipes) {
+            if (recipes.length === 0) {
+                document.getElementById("resultText").innerHTML = "<p class='small-text'> No recipes found. </p>"
+
+            } else {
+                const ingredientsInput = document.getElementById('ingredients-input').value;
+                var recipeStr = ''
+                recipes.forEach(recipe => {
+
+                    recipeStr += `[${recipe.title}##${recipe.id}##${recipe.image}]~~` 
+
+                });
+                
+                recipeStr = recipeStr.substring(0, recipeStr.length-2)
+                console.log(recipeStr)
+                
+                document.cookie = "searchStr=" + ingredientsInput
+                document.cookie = "recipeStr=" + recipeStr
+                console.log(document.cookie)
+
+                window.location.href = "recipe_searched.html"
+            }
+        }
+       
+    </script>
+
+</body>

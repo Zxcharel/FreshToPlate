@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="style.css" />
+
+</head>
+
+<body>
+
+    <!-- REMEMBER TO UPDATE -->
+    <div class="topnav">
+        <a href="#">Home</a>
+        <a class="active" href="#">Recipes</a>
+        <a href="#">Inventory</a>
+        <div class="topnav-right">
+          <a href="#">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                </svg>
+          </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col p-3">
+                <input type="text" placeholder="Search for a recipe" id="ingredients-input" name="ingredients-input">
+                <button onclick="searchRecipesByIngredients()">Search</button>
+                <div id="resultText"> </div>
+            </div>
+              
+        </div>
+    </div>
+
+    <div class="album py-5 bg-light">
+        <div class="container">
+            <div class="row row-cols-1 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 justify-content-center"  id="results">
+            </div>
+        </div>        
+    </div>
+    
+<script>
+
+    var cookie = document.cookie
+    search = cookie.split("; ")
+    console.log(search)
+    var searchStr = search[0].substring(10,)
+    console.log(searchStr)
+    var recipeStr = search[1].substring(10,)
+    console.log(recipeStr)
+    var recipesStrArr = recipeStr.split("~~") 
+    console.log(recipesStrArr)
+    var recipesObj = {}
+
+    document.getElementById("resultText").innerHTML = `<p class='small-text'> ${recipesStrArr.length} results found for "${searchStr}" </p>`
+
+    for (recipeStr of recipesStrArr) {
+        
+        recipeStr = recipeStr.substring(1,recipeStr.length-1)
+        console.log(recipeStr)
+        recipeStrInfo = recipeStr.split("##")
+        console.log(recipeStrInfo)
+        recipesObj[recipeStrInfo[0]] = {"id": recipeStrInfo[1], "image": recipeStrInfo[2]}
+
+    }
+
+    console.log(recipesObj)
+
+    var results = document.getElementById("results")
+    
+
+    recipeNames = Object.keys(recipesObj)
+
+    for (recipe of recipeNames) {
+        createCard(recipe, recipesObj)
+    }
+
+    function createCard(recipeName, recipesObj) {
+        
+        const col = document.createElement("div");
+        col.className = "col";
+
+        const card = document.createElement("div");
+        card.className = "card shadow-sm m-1";
+
+        const img = document.createElement("img");
+        img.src = recipesObj[recipeName].image;
+        img.class = "p-0 m-auto"
+
+        const cardBody = document.createElement("div");
+        cardBody.className = "card-body";
+
+        const description = document.createElement("p");
+        description.className = "card-text"
+        description.textContent = recipesObj[recipeName].id;
+
+        cardBody.appendChild(description)
+        card.appendChild(img)
+        card.appendChild(cardBody)
+        col.appendChild(card)
+
+        results.appendChild(card);
+
+        // <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+
+        //     <div class="col">
+        //         <div class="card shadow-sm">
+                    
+        //             <img width="100%" height="225" src="album/Minions_characters.png">
+        //             <div class="card-body">
+        //                 <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+        //                 <div class="d-flex justify-content-between align-items-center">
+        //                     <div class="btn-group">
+        //                     <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+        //                     <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
+        //                     </div>
+        //                     <small class="text-muted">9 mins</small>
+        //                 </div>
+        //             </div>
+        //         </div>
+        //     </div>
+
+        // make it such that the whole thing is a button?
+
+    }
+
+    const apiKey = '014f17961be149788f7dbc80c946612c';
+        const apiUrl = 'https://api.spoonacular.com/recipes/findByIngredients';
+
+        async function searchRecipesByIngredients() {
+            const ingredientsInput = document.getElementById('ingredients-input').value;
+            console.log(`${apiUrl}?apiKey=${apiKey}&ingredients=${ingredientsInput}`)            
+
+            try {
+                var response = await fetch(`${apiUrl}?apiKey=${apiKey}&ingredients=${ingredientsInput}`);
+              
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data); // Add this line to log the data structure
+                    displayRecipes(data);
+                } else {
+                    console.error('Error:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function displayRecipes(recipes) {
+            if (recipes.length === 0) {
+                document.getElementById("resultText").innerHTML = "<p class='small-text'> No recipes found. </p>"
+
+            } else {
+                const ingredientsInput = document.getElementById('ingredients-input').value;
+                var recipeStr = ''
+                recipes.forEach(recipe => {
+
+                    recipeStr += `[${recipe.title}##${recipe.id}##${recipe.image}]~~` 
+
+                });
+                
+                recipeStr = recipeStr.substring(0, recipeStr.length-2)
+                console.log(recipeStr)
+                
+                document.cookie = "searchStr=" + ingredientsInput
+                document.cookie = "recipeStr=" + recipeStr
+                console.log(document.cookie)
+
+                window.location.href = "recipe_searched.html"
+            }
+        }
+        
+    </script>
+    
+</body>
+
+

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="../style.css" />
+
+    <!-- Add Axios Library -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+</head>
+
+<body>
+
+    <!-- REMEMBER TO UPDATE -->
+    <!-- nav bar -->
+    <div class="topnav sticky-top">
+        <a href="#">Home</a>
+        <a href="../recipe/recipe_main.html">Recipes</a>
+        <a class="active" href="#">Inventory</a>
+        <a href="../mealplan/mealplan_main.html">Meal Plan</a>
+        <div class="topnav-right">
+          <a href="#">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                </svg>
+          </a>
+        </div>
+    </div>
+    
+    <div class="container my-1">
+        <div class="row">
+            <div class="col p-3">
+                <input type="text" id="input">
+                <input type="text" id="amt"> 
+                <button id='btn' onclick="addItem()">Add Item</button> 
+
+                <div class="row px-3">
+                    <div class="col-4 p-0">
+                        <div class="autocomplete" id="autocomplete" style="max-height: 8rem; overflow: scroll;"></div>
+                    </div>
+                </div>
+
+                <div class='small-text' id="status"></div>
+            </div>
+            
+        </div>
+
+        <div class="row">
+            <div class="col p-3">
+                <ul id="inventoryList"></ul>
+            </div>
+        </div>
+        
+    </div>
+
+    
+    <script type="text/javascript" src="../inventory/inventory.js"></script>
+    <script>
+
+        displayInventory()
+
+        function addItem() {
+            document.getElementById("autocompleteTable").style.display = "none"
+            var item = document.getElementById("input").value
+            var amt = document.getElementById("amt").value
+            if (item == "") {
+                document.getElementById("status").innerHTML = "<p class='small-text'> Please enter a valid ingredient. </p>"
+                console.log(document.getElementById("status"))
+            }
+            else if (isNaN(Number(amt)) || amt == "") {
+                //do not let user input -ve number, set 2 buttons 1 to add 1 to delete? then form validate the delete amount?
+                document.getElementById("status").innerHTML = "<p class='small-text'> Please enter a valid amount. </p>"
+            }
+            else {
+                createListItem(item, amt);
+                displayInventory()
+                inventoryItems()
+            }
+        }
+        
+        inventoryItems()
+
+        const apiKey = 'e78e35166a7344daad7f38f6d2b66b3c';
+        const apiUrl = 'https://api.spoonacular.com/recipes/complexSearch';
+
+        var input = document.getElementById("input")
+        input.addEventListener("keyup", getSuggestion)
+
+        function getSuggestion() {
+            
+            let value = input.value
+            var url = `https://api.spoonacular.com/food/ingredients/autocomplete?apiKey=${apiKey}&number=10&query=${value}`
+            
+            console.log(value)
+
+            axios.get(url)
+
+            .then (
+
+                response => { //function shorthand
+                    console.log(response.data)
+
+                    let output = document.getElementById("autocomplete")
+
+                    if (response.data.length !== 0) {
+
+                        output.innerText = ""
+                        var autocompleteSugg = document.createElement("table")
+                        autocompleteSugg.className = "autocompleteTable"
+                        autocompleteSugg.id = "autocompleteTable"
+
+                        for (index in response.data) {
+                            var autocompleteLine = document.createElement("tr")
+                            autocompleteLine.setAttribute("onclick", "chosen(this)")    
+                            var autocompleteData = document.createElement("td")
+                            var autocompleteText = document.createTextNode(response.data[index].name)
+
+                            autocompleteData.appendChild(autocompleteText)
+                            autocompleteLine.appendChild(autocompleteData)
+                            autocompleteSugg.appendChild(autocompleteLine)
+                        }
+
+                        output.appendChild(autocompleteSugg)
+
+                    }
+
+                    else {
+                        output.innerText = ""
+                    }
+                    
+                    
+                }
+            )
+
+            .catch (
+                error => {
+                    let output = document.getElementById("autocomplete")
+                    console.log(error.message)
+                }
+            )
+        }
+
+        function chosen(sugg) {
+            document.getElementById("input").value = sugg.innerText
+            document.getElementById("autocompleteTable").style.display = "none"
+        }
+
+
+        
+    </script>
+    
+
+
+</body>
+</html>

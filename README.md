@@ -17,3 +17,4 @@ In the unfortunate event that the application fails to generate stuff, please us
 7e04402aa4904de69462be5a192a434b
 Ctrl/Cmd F and search for "apiKey" in the files. Replace the apiKey with one of the above keys. This should fix any issues you may encounter
 
+ 
